@@ -1,0 +1,10 @@
+# Dependencies and build output live under web/ and are ignored there.
+node_modules/
+.DS_Store
+
+# Source media for the portrait sequence: the raw renders and intermediate
+# stills are large and are not needed to build the site — the frames actually
+# served are committed under web/public/portrait/.
+/output/
+/*.mp4
+/*.png

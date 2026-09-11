@@ -1,0 +1,528 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   Design tokens
+   Accent: "signal lime" — the green of a passing CI run and a healthy
+   observability dashboard. Chosen to avoid the generic purple AI look
+   while staying legible on near-black. Secondary accent is a warm amber
+   used only for the Intelligence pillar and hover states.
+   --------------------------------------------------------------- */
+:root {
+  --radius: 0.75rem;
+
+  /* light theme */
+  --background: oklch(0.97 0.005 106);
+  --foreground: oklch(0.18 0.01 106);
+  --card: oklch(0.99 0.004 106);
+  --card-foreground: oklch(0.18 0.01 106);
+  --popover: oklch(0.99 0.004 106);
+  --popover-foreground: oklch(0.18 0.01 106);
+  --primary: oklch(0.55 0.15 128);
+  --primary-foreground: oklch(0.99 0.004 106);
+  --secondary: oklch(0.94 0.006 106);
+  --secondary-foreground: oklch(0.24 0.01 106);
+  --muted: oklch(0.94 0.006 106);
+  --muted-foreground: oklch(0.48 0.012 106);
+  --accent: oklch(0.93 0.03 124);
+  --accent-foreground: oklch(0.24 0.01 106);
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.99 0.004 106);
+  --border: oklch(0.89 0.008 106);
+  --input: oklch(0.89 0.008 106);
+  --ring: oklch(0.55 0.15 128);
+
+  /* Brand rails. On a near-white ground the luminous lime only reaches ~1.1:1,
+     so light mode darkens every token that can render as text to clear WCAG AA.
+     --signal-vivid keeps the original glow for fills, borders and beams. */
+  --signal: oklch(0.52 0.15 128);
+  --signal-vivid: oklch(0.86 0.19 124);
+  --signal-dim: oklch(0.45 0.12 128);
+  --ember: oklch(0.52 0.15 55);
+  --pillar-build: oklch(0.52 0.15 128);
+  --pillar-deploy: oklch(0.50 0.13 235);
+  --pillar-ai: oklch(0.52 0.15 55);
+
+  color-scheme: light;
+}
+
+.dark {
+  --background: oklch(0.16 0.008 240);
+  --foreground: oklch(0.96 0.004 106);
+  --card: oklch(0.20 0.010 240);
+  --card-foreground: oklch(0.96 0.004 106);
+  --popover: oklch(0.19 0.010 240);
+  --popover-foreground: oklch(0.96 0.004 106);
+  --primary: oklch(0.86 0.19 124);
+  --primary-foreground: oklch(0.16 0.008 240);
+  --secondary: oklch(0.25 0.012 240);
+  --secondary-foreground: oklch(0.96 0.004 106);
+  --muted: oklch(0.25 0.012 240);
+  --muted-foreground: oklch(0.72 0.012 240);
+  --accent: oklch(0.28 0.014 240);
+  --accent-foreground: oklch(0.96 0.004 106);
+  --destructive: oklch(0.66 0.20 25);
+  --destructive-foreground: oklch(0.16 0.008 240);
+  --border: oklch(0.30 0.014 240);
+  --input: oklch(0.30 0.014 240);
+  --ring: oklch(0.86 0.19 124);
+
+  /* Brand rails at full luminosity — on the dark ground these clear AA on
+     their own, so text and glow can share one value. */
+  --signal: oklch(0.86 0.19 124);
+  --signal-vivid: oklch(0.86 0.19 124);
+  --signal-dim: oklch(0.62 0.14 128);
+  --ember: oklch(0.78 0.16 62);
+  --pillar-build: oklch(0.86 0.19 124);
+  --pillar-deploy: oklch(0.80 0.13 205);
+  --pillar-ai: oklch(0.78 0.16 62);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-signal: var(--signal);
+  --color-signal-vivid: var(--signal-vivid);
+  --color-signal-dim: var(--signal-dim);
+  --color-ember: var(--ember);
+  --color-pillar-build: var(--pillar-build);
+  --color-pillar-deploy: var(--pillar-deploy);
+  --color-pillar-ai: var(--pillar-ai);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --animate-marquee: marquee var(--duration, 40s) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  --animate-background-position-spin: background-position-spin 3000ms infinite alternate;
+  --animate-shine: shine var(--duration) infinite linear;
+  --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  --animate-grid: grid 15s linear infinite;
+  --animate-orbit: orbit calc(var(--duration)*1s) linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
+@keyframes shimmer-slide {
+  to { transform: translate(calc(100cqw - 100%), 0); }
+}
+@keyframes spin-around {
+  0% { transform: translateZ(0) rotate(0); }
+  15%, 35% { transform: translateZ(0) rotate(90deg); }
+  65%, 85% { transform: translateZ(0) rotate(270deg); }
+  100% { transform: translateZ(0) rotate(360deg); }
+}
+@keyframes background-position-spin {
+  0% { background-position: top center; }
+  100% { background-position: bottom center; }
+}
+@keyframes shine {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  to { background-position: 0% 0%; }
+}
+@keyframes aurora {
+  0% { background-position: 0% 50%; transform: rotate(-5deg) scale(0.9); }
+  25% { background-position: 50% 100%; transform: rotate(5deg) scale(1.1); }
+  50% { background-position: 100% 50%; transform: rotate(-3deg) scale(0.95); }
+  75% { background-position: 50% 0%; transform: rotate(3deg) scale(1.05); }
+  100% { background-position: 0% 50%; transform: rotate(-5deg) scale(0.9); }
+}
+@keyframes orbit {
+  0% { transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg)); }
+  100% { transform: rotate(calc(var(--angle) * 1deg + 360deg)) translateY(calc(var(--radius) * 1px)) rotate(calc((var(--angle) * -1deg) - 360deg)); }
+}
+@keyframes grid {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+@layer base {
+  * { border-color: var(--border); }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+  button:disabled { cursor: default; }
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  ::selection { background: var(--signal); color: oklch(0.16 0.008 240); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Portrait hero — preserved from the original build, rewired onto
+   the new tokens. This is the signature piece of the site.
+   --------------------------------------------------------------- */
+.hero {
+  position: relative; height: 100svh; min-height: 760px; overflow: clip;
+  isolation: isolate; padding: 0 4.5vw; background: var(--background);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.hero-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 0%, transparent 0%, color-mix(in oklab, var(--background) 55%, transparent) 60%, var(--background) 100%);
+}
+
+/* animated grid field + accent glow — the cheap, always-on hero backdrop */
+.hero-grid {
+  position: absolute; inset: -50% 0 0;
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 7%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 0%, transparent 75%);
+  animation: var(--animate-grid);
+}
+.hero-glow {
+  position: absolute; left: 50%; top: -10%; width: min(900px, 85vw); aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, color-mix(in oklab, var(--signal-vivid) 16%, transparent) 0%, transparent 62%);
+  filter: blur(30px);
+}
+
+/* ---------------------------------------------------------------
+   Hero copy phases
+
+   The hero is pinned while the portrait scrubs, so the left column cannot use
+   an ordinary scroll trigger — nothing moves relative to the viewport. Instead
+   `--hero-phase` (0..1) is written onto `.hero` by the same ScrollTrigger that
+   drives the portrait, and everything below is a pure function of it. That
+   keeps text and portrait frame-locked, and makes reverse scrubbing free.
+   --------------------------------------------------------------- */
+/* Registered so the phase value is a real <number>: unregistered custom
+   properties are substituted as tokens, and the arithmetic below would not
+   resolve. Registration also makes it animatable, which is what lets the
+   reduced-motion fallback settle without a jump. */
+@property --hero-phase {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.hero-copy {
+  position: relative; z-index: 5;
+  display: grid;
+  /* One row holds both phases stacked; the actions sit in their own row below
+     so they never move as the phases swap. */
+  grid-template-rows: auto auto;
+}
+.hero-phase {
+  grid-row: 1; grid-column: 1;
+  /* Both phases share the row, so the row is as tall as the taller of them and
+     the actions below never shift as they swap. `align-self: start` keeps each
+     phase anchored to the top of that shared box rather than stretching. */
+  align-self: start;
+  /* Both phases stay mounted: unmounting phase A would restart the terminal's
+     typing sequence every time the reader scrubs back up. */
+  transition: opacity .12s linear;
+  will-change: opacity, transform, filter;
+}
+/* Phase A fades and lifts away over the first 45% of the scrub. */
+.hero-phase-a {
+  --t: clamp(0, calc(var(--hero-phase, 0) / 0.45), 1);
+  opacity: calc(1 - var(--t));
+  transform: translateY(calc(var(--t) * -26px));
+  filter: blur(calc(var(--t) * 6px));
+}
+/* Phase B arrives over the last 45%, so there is a beat of clean portrait
+   between them rather than a muddy dissolve. */
+.hero-phase-b {
+  --t: clamp(0, calc((var(--hero-phase, 0) - 0.55) / 0.45), 1);
+  opacity: var(--t);
+  transform: translateY(calc((1 - var(--t)) * 26px));
+  filter: blur(calc((1 - var(--t)) * 6px));
+  pointer-events: none;
+}
+.line-strike {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklab, var(--signal) 70%, transparent);
+  text-decoration-thickness: .06em;
+}
+
+.hero-readout {
+  margin: 22px 0 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 8px;
+  font: 12px/1.6 var(--font-mono); color: var(--muted-foreground);
+}
+.hero-readout li { display: flex; align-items: baseline; gap: 10px; }
+.hero-readout-mark { color: var(--signal); }
+.hero-readout-char { transition: color .15s linear; }
+.hero-readout-char.is-scrambled { color: color-mix(in oklab, var(--signal) 65%, transparent); }
+
+.hero-terminal-slot {
+  position: relative; z-index: 5; margin-top: 32px;
+  width: min(430px, 46%); font-size: 12px;
+}
+.hero-actions {
+  position: relative; z-index: 6; display: flex; align-items: center; gap: 22px;
+  margin-top: 30px; flex-wrap: wrap;
+}
+.hero-ghost-link {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+  color: var(--muted-foreground); padding-bottom: 3px;
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
+  transition: color .2s ease, border-color .2s ease;
+}
+.hero-ghost-link:hover { color: var(--signal); border-color: var(--signal); }
+
+.scroll-cue {
+  position: absolute; z-index: 6; bottom: 26px; right: 4.5vw;
+  display: flex; align-items: center; gap: 10px;
+  font: 10px var(--font-mono); letter-spacing: .14em; color: var(--muted-foreground);
+  transition: color .2s ease;
+}
+.scroll-cue:hover { color: var(--signal); }
+
+.hero-title {
+  position: relative; z-index: 3; margin: 0; pointer-events: none;
+  max-width: min(56%, 760px);
+  font-weight: 600; letter-spacing: -.04em; line-height: .95; text-transform: lowercase;
+}
+.hero-title .line { display: block; }
+.line-a { position: relative; z-index: 4; font-size: clamp(22px, 2.3vw, 34px); color: var(--muted-foreground); font-weight: 500; }
+.line-b { position: relative; z-index: 3; margin-top: .4vh; font-size: clamp(38px, 7.4vw, 122px); color: var(--foreground); }
+.line-c { position: relative; z-index: 4; margin-top: .6vh; font-size: clamp(20px, 2.1vw, 30px); color: var(--muted-foreground); font-weight: 500; }
+.line-accent { color: var(--signal); font-weight: 600; }
+
+.hero-description {
+  position: relative; z-index: 4; max-width: 42ch; color: var(--muted-foreground);
+  font-size: 15px; line-height: 1.7; margin: 20px 0 0;
+}
+
+.portrait-stage {
+  position: absolute; z-index: 2; left: auto; right: 0; bottom: 0;
+  width: 58%; height: 96%; pointer-events: none;
+}
+.portrait-media {
+  position: absolute; bottom: 0; width: 100%; height: 100%;
+  /* Top fade dissolves the bleed where the crown meets the hero's edge; the
+     bottom fade is the original grounding gradient. The second mask softens the
+     left edge, where `cover` slices the plate mid-lightning against open page. */
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, black 13%, black 74%, transparent 97%),
+    linear-gradient(to right, transparent 0%, black 12%);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+/* A blur pass masked to the top band alone, so the crown melts into the
+   backdrop at the bleed instead of ending on a straight line. */
+.portrait-media::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  backdrop-filter: blur(14px);
+  mask-image: linear-gradient(to bottom, black 0%, black 4%, transparent 15%);
+  pointer-events: none;
+}
+/* `cover` rather than `contain`: the 16:9 plate letterboxed inside this tall
+   box left the figure small and floating. Filling the box scales it up and
+   lets the crown bleed past the top edge, which is the intended framing —
+   the hero's `overflow: clip` does the trimming. `--portrait-scale` pushes it
+   further where the box is still too wide to fill convincingly. */
+.portrait-media canvas, .portrait-poster {
+  position: absolute; width: 100%; height: 100%;
+  object-fit: cover;
+  /* The hero frames the plate bottom-right; the About card centres it. The
+     flight interpolates between the two so the subject is already sitting
+     where the card will show them by the time the handoff happens — without
+     this the portrait visibly jumps at the moment of the swap. */
+  object-position: calc(100% - var(--hero-flight, 0) * 50%) bottom;
+  transform: scale(var(--portrait-scale, 1));
+  transform-origin: 50% 100%;
+}
+.portrait-media canvas { opacity: 0; transition: opacity .4s ease; }
+.portrait-media canvas[data-ready=true] { opacity: 1; }
+.portrait-media:has(canvas[data-ready=true]) .portrait-poster { visibility: hidden; }
+
+/* ---------------------------------------------------------------
+   Portrait flight — hero stage into the About card
+
+   Act two of the hero pin runs the transform frames backwards (humanoid back
+   into the person) while the stage itself is tweened from its hero box onto
+   the About card's box. `--hero-flight` (0..1) is written by that scrub; the
+   rules below dissolve the hero's framing as the portrait becomes a photo.
+   --------------------------------------------------------------- */
+@property --hero-flight {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* The hero's soft edges belong to a full-bleed portrait, not to a framed
+   photo, so they retract over the flight and the card's corner radius grows
+   in to meet the landing box. */
+.portrait-media {
+  --flight: var(--hero-flight, 0);
+  border-radius: calc(var(--flight) * 15px);
+  overflow: hidden;
+}
+/* Masks are dropped outright rather than animated: `mask-composite` cannot be
+   interpolated, and a half-faded edge inside a hard-edged card reads as a
+   rendering fault. Holding them until the portrait is nearly home keeps the
+   soft edges for the part of the flight that crosses open page — dropped at
+   take-off, the bare rectangular crop is visible the whole way down. */
+.hero[data-flight="on"] .portrait-stage[data-landing="true"] .portrait-media {
+  mask-image: none;
+}
+.hero[data-flight="on"] .portrait-stage[data-landing="true"] .portrait-media::after { opacity: 0; }
+.portrait-media::after { transition: opacity .25s linear; }
+
+/* In flight the stage is `position: fixed` (set from JS) so it can travel from
+   the hero down onto the About card, across two sections and past the hero's
+   own clip. The hero must stop clipping and stop being a containing block for
+   that to work — `overflow: clip` alone would trap a fixed child. */
+.hero[data-flight="on"] { overflow: visible; }
+/* Behind the page, not above it. The portrait has to cross the whole About
+   section to reach its card, and on narrow screens it passes directly over the
+   section heading and intro copy — painted on top it reads as a portrait
+   smeared across the text. Sliding it under the sections it traverses lets the
+   copy stay legible while the portrait moves behind it, and the card it lands
+   in is transparent until the handoff, so it surfaces exactly on arrival. */
+.hero[data-flight="on"] .portrait-stage { z-index: -1; }
+/* The About section paints its own ground, which would hide a portrait flying
+   underneath. Dropping it lets the flight show through while it crosses — but
+   only until the portrait arrives, or the landed card would be left without the
+   plate its image is supposed to sit on. */
+.hero[data-flight="on"]:has(.portrait-stage[data-landed="false"]) ~ main #about,
+.hero[data-flight="on"]:has(.portrait-stage[data-landed="false"]) ~ #about {
+  background: transparent;
+}
+
+/* The card holds its footprint from the start so the layout never reflows,
+   but shows nothing until the flying canvas has landed and handed off. */
+.portrait-landing[data-handoff="pending"] { opacity: 0; }
+/* Mirror image of the card: the flying canvas retires the moment the card
+   takes over, so only one of the two is ever painted. */
+.portrait-stage[data-landed="true"] { opacity: 0; pointer-events: none; }
+
+.skip-link {
+  position: fixed; top: 0; left: 20px; transform: translateY(-150%);
+  background: var(--foreground); color: var(--background); padding: 15px;
+  z-index: 100; border-radius: 0 0 var(--radius-md) var(--radius-md);
+  transition: transform .18s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+.media-error {
+  position: absolute; z-index: 7; bottom: 90px; left: 4.5vw; font-size: 12px;
+  background: var(--card); padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md);
+}
+.media-error button { margin-left: 12px; color: var(--signal); background: none; border: 0; padding: 8px; }
+
+@media (max-width: 1100px) { .hero-terminal-slot { display: none; } }
+@media (min-width: 1600px) { .portrait-stage { width: 52%; right: 0; } }
+
+@media (max-width: 767px) {
+  .hero { min-height: 780px; padding: 0 6vw; }
+  /* The text column owns the full width on mobile; the portrait sits behind it. */
+  .hero-title { max-width: 100%; }
+  .line-a { font-size: clamp(18px, 5vw, 26px); margin-top: 0; }
+  .line-c { font-size: clamp(17px, 4.6vw, 24px); margin-top: .6vh; }
+  /* "build.ship.think." cannot fit one 390px line at a readable size. The
+     words are nowrap units, so the line breaks between them onto two rows. */
+  .line-b {
+    font-size: clamp(34px, 12.5vw, 62px); margin-top: .5vh;
+    line-height: .94; white-space: normal;
+  }
+  .hero-description { font-size: 13px; max-width: 34ch; }
+  .hero-terminal-slot { display: none; }
+  .hero-actions { margin-top: 22px; gap: 14px; }
+  .scroll-cue { right: 6vw; bottom: 18px; font-size: 8px; }
+  .hero-grid { background-size: 40px 40px; }
+  .portrait-stage { width: 100%; right: 0; bottom: 0; height: 88%; }
+  .media-error { left: 6vw; bottom: 66px; }
+}
+
+/* Theme toggle view transition (Magic UI AnimatedThemeToggler, controlled mode) */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root[data-magicui-theme-vt="active"]::view-transition-group(root) {
+  animation-duration: var(--magicui-theme-toggle-vt-duration, 400ms);
+}
+:root[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  clip-path: var(--magicui-theme-vt-clip-from);
+}
+:root[data-magicui-theme-vt="active"]::view-transition-old(root) {
+  z-index: 0;
+}
+:root[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
+}
+
+/* ---------------------------------------------------------------
+   Shared section shell
+   --------------------------------------------------------------- */
+.section-shell {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(90px, 12vh, 150px) 4.5vw;
+  scroll-margin-top: 40px;
+}
+@media (max-width: 767px) {
+  .section-shell { padding-left: 6vw; padding-right: 6vw; }
+}
+
+.contact-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted-foreground); transition: color .2s ease;
+}
+.contact-link:hover { color: var(--signal); }
