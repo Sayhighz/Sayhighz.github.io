@@ -102,15 +102,20 @@ export function PortraitHero() {
         const render = () => {
           drawRequest = 0;
           const frames = activeSequence === "idle" ? idleFrames : transformFrames;
-          const bitmap = frames.get(target);
-          const frameKey = `${activeSequence}:${target}`;
-          if (!bitmap || frameKey === drawn) return;
+          // Nearest rather than exact: at speed the frame due this tick is often
+          // still decoding, and holding the previous image until it lands is
+          // what makes a fast scroll look stuck. A neighbour is indistinguishable
+          // in motion and keeps the portrait tracking the scroll.
+          const hit = frames.nearest(target);
+          if (!hit) return;
+          const frameKey = `${activeSequence}:${hit.frame}`;
+          if (frameKey === drawn) return;
           ctx.clearRect(0, 0, surface.width, surface.height);
-          ctx.drawImage(bitmap, 0, 0, surface.width, surface.height);
+          ctx.drawImage(hit.bitmap, 0, 0, surface.width, surface.height);
           drawn = frameKey;
           surface.dataset.ready = "true";
           surface.dataset.sequence = activeSequence;
-          surface.dataset.frame = String(target);
+          surface.dataset.frame = String(hit.frame);
         };
         const schedule = () => {
           if (!disposed && !drawRequest) drawRequest = requestAnimationFrame(render);
@@ -301,6 +306,16 @@ export function PortraitHero() {
          */
         if (shouldPreload()) {
           transformFrames.preload(Array.from({ length: FRAME_COUNTS.transform }, (_, i) => i));
+          /**
+           * Fetching is only half the problem. A decode costs several
+           * milliseconds and a fast scrub crosses more frames per tick than can
+           * possibly be decoded on demand, so the portrait would sit on one
+           * image while the scroll ran away from it — the freeze that a slow
+           * scroll never shows. Decoding a stride of frames up front, in the
+           * idle gaps, gives that scrub something near at hand to draw the whole
+           * way down.
+           */
+          void transformFrames.predecode();
         } else {
           transformFrames.preload([0]);
         }
