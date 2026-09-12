@@ -13,6 +13,26 @@ import { profile } from "@/lib/content";
 gsap.registerPlugin(ScrollTrigger);
 
 /**
+ * Whether to pull the full transform sequence ahead of the scroll.
+ *
+ * The warm-up trades bandwidth for smoothness — around 13MB on desktop, 7MB on
+ * mobile. That is the right trade on a normal connection and the wrong one on a
+ * metered or slow link, where it would compete with the frames actually being
+ * shown. `navigator.connection` is Chromium-only; absent it (Safari, Firefox)
+ * the warm-up proceeds, matching those browsers' lack of any data-saver signal.
+ */
+const shouldPreload = () => {
+  const connection = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
+  if (!connection) return true;
+  if (connection.saveData) return false;
+  return connection.effectiveType !== "slow-2g" && connection.effectiveType !== "2g";
+};
+
+/**
  * The signature piece of the site: a looping idle portrait that transforms
  * into a humanoid as the visitor scrolls.
  * Frames decode off the main thread and are held in a bounded LRU cache, so
@@ -265,7 +285,25 @@ export function PortraitHero() {
         });
         idleFrames.request(0);
         idleFrames.preload(Array.from({ length: 12 }, (_, i) => i + 1));
-        transformFrames.preload([0]);
+        /**
+         * Warm the whole transform sequence while the idle loop plays.
+         *
+         * Only frame 0 used to be fetched ahead, which is fine on a dev server
+         * but not over a network: the scrub then starts from cold and every
+         * frame it asks for costs a round trip, so the portrait steps instead of
+         * turning. The hero sits idle for seconds before anyone scrolls, and
+         * that time is free — spending it on the frames the scroll is about to
+         * need is what makes the transform play at the speed it was authored.
+         *
+         * Ordered from the start of the sequence outward so the frames reached
+         * first arrive first; the loader's own ±6 window around the live scrub
+         * still jumps the queue if a reader outruns the warm-up.
+         */
+        if (shouldPreload()) {
+          transformFrames.preload(Array.from({ length: FRAME_COUNTS.transform }, (_, i) => i));
+        } else {
+          transformFrames.preload([0]);
+        }
 
         let tween: gsap.core.Timeline | null = null;
         let scrollTriggerInstance: ScrollTrigger | null = null;

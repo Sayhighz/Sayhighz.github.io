@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { ServiceWorker } from "@/components/service-worker";
 import { profile } from "@/lib/content";
 import "./globals.css";
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <a href="#about" className="skip-link">Skip introduction</a>
             {children}
             <Toaster position="bottom-right" />
+            <ServiceWorker />
           </TooltipProvider>
         </ThemeProvider>
       </body>
