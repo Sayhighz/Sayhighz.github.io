@@ -338,7 +338,25 @@ export function PortraitHero() {
           tween = gsap.timeline({
             scrollTrigger: {
               trigger: root, start: "top top", end: () => `+=${window.innerHeight * (mobile ? 1.6 : 2)}`,
-              pin: true, scrub: 0.25, invalidateOnRefresh: true,
+              pin: true,
+              /**
+               * Scrub smoothing, and the reason a fast scroll still reads as an
+               * animation. The playhead eases toward the scroll position rather
+               * than snapping to it, so a flick that crosses the whole sequence
+               * in a few ticks is played out over the following second instead
+               * of skipping to the end — the decode budget (~3 frames per 16ms)
+               * cannot serve a scrub that moves twenty frames a tick, and this
+               * is what keeps it from having to.
+               *
+               * The cost is that the portrait trails the scroll: ~14 frames
+               * behind during an ordinary read at this value, against ~3 at
+               * 0.25. Higher shows more of the transform on a flick (2.0 draws
+               * ~38 frames where 1.2 draws ~30) but the trailing becomes
+               * noticeable as the portrait visibly finishing after the scroll
+               * has stopped.
+               */
+              scrub: 1.2,
+              invalidateOnRefresh: true,
               onUpdate: (self) => publishPhase(self.progress),
             },
           });
